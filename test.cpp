@@ -71,7 +71,7 @@ public:
 	bool operator==(const index_2D& rhs) const{return r==rhs.r && c==rhs.c;}
 };
 
-// Map a linear index to a (row, column) index (zero-based index).
+// Map a linear index to a (row, column) index (zero-based index, row-major order).
 index_2D map_1D_to_2D(const index_1D& i, const index_1D& ncol)
 {
 	index_2D result;
@@ -80,7 +80,7 @@ index_2D map_1D_to_2D(const index_1D& i, const index_1D& ncol)
 	return result;
 }
 
-// Map a (row, column) index to a linear index (zero-based index).
+// Map a (row, column) index to a linear index (zero-based index, row-major order).
 index_1D map_2D_to_1D(const index_2D& p, const index_1D& ncol)
 {
 	return p.r*ncol+p.c;
