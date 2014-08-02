@@ -1,5 +1,20 @@
 // author: Alessandro Gentilini, 2014
 
+// A C++ implementation of the Algorithm 12.1, *Binary graph cuts* as found in the
+// [*Algorithm Booklet*](http://www.cs.ucl.ac.uk/staff/s.prince/book/Algorithms.pdf)
+// by [Simon J.D. Prince](http://www0.cs.ucl.ac.uk/staff/s.prince/).
+
+// The Algorithm Booklet is a companion to the book
+// [*Computer Vision: Models, Learning, and Inference*]
+// (http://www.computervisionmodels.com/) by Simon J.D. Prince.
+
+// The maximum flow algorithm is [MAXFLOW version 3.03]
+// (http://pub.ist.ac.at/~vnk/software/maxflow-v3.03.src.zip) based on the paper:
+
+// BOYKOV, Yuri; KOLMOGOROV, Vladimir.
+// An experimental comparison of min-cut/max-flow algorithms for energy minimization in vision.
+// *Pattern Analysis and Machine Intelligence, IEEE Transactions on*, 2004, 26.9: 1124-1137.
+
 #include <iostream>
 #include "maxflow-v3.03.src/graph.h"
 
@@ -29,8 +44,10 @@ void test_Prince_figure_12_6()
 
 	double flow = g -> maxflow();
 
+	// I do not what the correct value should be.
 	std::cout << "Max flow: " << flow << "\n";
 
+	// The segmentation looks correct.
 	assert(g->what_segment(0) == GraphType::SOURCE);
 	assert(g->what_segment(1) == GraphType::SOURCE);
 	assert(g->what_segment(2) == GraphType::SOURCE);
