@@ -46,7 +46,7 @@ void test_Prince_figure_12_6()
 	double flow = g -> maxflow();
 
 	// I do not know what the correct value should be.
-	std::cout << "Max flow: " << flow << "\n";
+	//std::cout << "Max flow: " << flow << "\n";
 
 	// The segmentation looks correct.
 	assert(g->what_segment(0) == GraphType::SOURCE);
@@ -136,6 +136,28 @@ int main(int argc, char** argv)
   {
       std::cout <<  "Could not open or find the image '" << image_name << "'\n";
       return -1;
+  }
+
+  const index_1D N = image.rows*image.cols;
+  const index_1D ncols = image.cols;
+
+	typedef Graph<int,int,int> GraphType;
+	// Initialize graph to empty
+	GraphType *g = new GraphType(N,4*N);
+
+	// Add all the nodes in one instruction
+	g->add_node(N);
+
+  for ( index_1D n = 0; n < N; n++ ) {
+  	// Create edges from source and to sink and set capacity to zero
+		g->add_tweights( n, 0, 0 );
+
+		// If edge between m and n is desired
+		for ( index_1D m = 0; m < n-1; m++ ) {
+			if ( need_edge(m,n,ncols) ) {
+				g->add_edge(m,n,0,0);
+			}
+		}
   }
 
 	return 0;
