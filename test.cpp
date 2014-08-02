@@ -99,7 +99,10 @@ bool need_edge(const index_1D& m, const index_1D& n, const index_1D& ncol)
 }
 
 #include <limits>
-int main()
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+int main(int argc, char** argv)
 {
 	test_Prince_figure_12_6();
 	assert(std::numeric_limits<index_1D>::is_integer);
@@ -111,6 +114,21 @@ int main()
 	assert(need_edge(7,8,ncol));
 	assert(need_edge(0,6,ncol));
 	assert(need_edge(0,7,ncol)==false);
+
+  if( argc != 2)
+  {
+   std::cout <<" Usage: " << argv[0] << " image_to_process" << "\n";
+   return -1;
+  }
+
+  std::string image_name(argv[1]);
+  cv::Mat image = cv::imread(image_name, CV_LOAD_IMAGE_GRAYSCALE);
+
+  if( !image.data )
+  {
+      std::cout <<  "Could not open or find the image '" << image_name << "'\n";
+      return -1;
+  }
 
 	return 0;
 }
