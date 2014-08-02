@@ -44,7 +44,7 @@ void test_Prince_figure_12_6()
 
 	double flow = g -> maxflow();
 
-	// I do not what the correct value should be.
+	// I do not know what the correct value should be.
 	std::cout << "Max flow: " << flow << "\n";
 
 	// The segmentation looks correct.
