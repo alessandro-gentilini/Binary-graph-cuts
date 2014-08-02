@@ -18,6 +18,7 @@
 #include <iostream>
 #include "maxflow-v3.03.src/graph.h"
 
+// Test for the example in Figure 12.6 of Computer Vision: Models, Learning, and Inference.
 void test_Prince_figure_12_6()
 {
 	typedef Graph<double,double,double> GraphType;
@@ -99,12 +100,11 @@ bool need_edge(const index_1D& m, const index_1D& n, const index_1D& ncol)
 }
 
 #include <limits>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-int main(int argc, char** argv)
+
+void test()
 {
 	test_Prince_figure_12_6();
+
 	assert(std::numeric_limits<index_1D>::is_integer);
 	assert(std::numeric_limits<index_1D>::is_signed);
 	const int ncol = 6;
@@ -114,6 +114,14 @@ int main(int argc, char** argv)
 	assert(need_edge(7,8,ncol));
 	assert(need_edge(0,6,ncol));
 	assert(need_edge(0,7,ncol)==false);
+}
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+int main(int argc, char** argv)
+{
+	test();
 
   if( argc != 2)
   {
