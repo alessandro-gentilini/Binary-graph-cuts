@@ -59,9 +59,36 @@ void test_Prince_figure_12_6()
 	delete g;
 }
 
+typedef int index_1D;
+
+class index_2D
+{
+public:
+	index_2D(const index_1D& rr=-1, const index_1D& cc=-1):r(rr),c(cc){}
+	index_1D r,c;
+	bool operator==(const index_2D& rhs) const{return r==rhs.r && c==rhs.c;}
+};
+
+index_2D map_1D_to_2D(const index_1D& i, const index_1D& ncol)
+{
+	index_2D result;
+	result.r = i/ncol;
+	result.c = i%ncol;
+	return result;
+}
+
+index_1D map_2D_to_1D(const index_2D& p, const index_1D& ncol)
+{
+	return p.r*ncol+p.c;
+}
+
+#include <limits>
 int main()
 {
 	test_Prince_figure_12_6();
+	assert(std::numeric_limits<index_1D>::is_integer);
+	assert(map_2D_to_1D(index_2D(1,2),6)==8);
+	assert(map_1D_to_2D(8,6)==index_2D(1,2));
 
 	return 0;
 }
