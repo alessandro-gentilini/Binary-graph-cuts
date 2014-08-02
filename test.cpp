@@ -71,7 +71,7 @@ public:
 	bool operator==(const index_2D& rhs) const{return r==rhs.r && c==rhs.c;}
 };
 
-// Map a linear index to a (row, column) index.
+// Map a linear index to a (row, column) index (zero-based index).
 index_2D map_1D_to_2D(const index_1D& i, const index_1D& ncol)
 {
 	index_2D result;
@@ -80,10 +80,22 @@ index_2D map_1D_to_2D(const index_1D& i, const index_1D& ncol)
 	return result;
 }
 
-// Map a (row, column) index to a linear index.
+// Map a (row, column) index to a linear index (zero-based index).
 index_1D map_2D_to_1D(const index_2D& p, const index_1D& ncol)
 {
 	return p.r*ncol+p.c;
+}
+
+// Return the Manhattan distance between two 2D coordinates (aka L1 norm).
+index_1D manhattan_distance(const index_2D& p1, const index_2D& p2)
+{
+	return std::abs(p1.r-p2.r)+std::abs(p1.c-p2.c);
+}
+
+// Return true if the two pixels m and n are 4-connected.
+bool need_edge(const index_1D& m, const index_1D& n, const index_1D& ncol)
+{
+	return manhattan_distance(map_1D_to_2D(m,ncol),map_1D_to_2D(n,ncol)) == 1;
 }
 
 #include <limits>
@@ -91,8 +103,14 @@ int main()
 {
 	test_Prince_figure_12_6();
 	assert(std::numeric_limits<index_1D>::is_integer);
-	assert(map_2D_to_1D(index_2D(1,2),6)==8);
-	assert(map_1D_to_2D(8,6)==index_2D(1,2));
+	assert(std::numeric_limits<index_1D>::is_signed);
+	const int ncol = 6;
+	assert(map_2D_to_1D(index_2D(1,2),ncol)==8);
+	assert(map_1D_to_2D(8,ncol)==index_2D(1,2));
+	assert(need_edge(8,7,ncol));
+	assert(need_edge(7,8,ncol));
+	assert(need_edge(0,6,ncol));
+	assert(need_edge(0,7,ncol)==false);
 
 	return 0;
 }
