@@ -99,6 +99,48 @@ bool need_edge(const index_1D& m, const index_1D& n, const index_1D& ncol)
 	return manhattan_distance(map_1D_to_2D(m,ncol),map_1D_to_2D(n,ncol)) == 1;
 }
 
+#include <random>
+#include <vector>
+
+double GetUniform()
+{
+	static std::default_random_engine re;
+	static std::uniform_real_distribution<double> Dist(0,1);
+	return Dist(re);
+}
+
+// John D. Cook, http://stackoverflow.com/a/311716/15485
+void SampleWithoutReplacement
+(
+    int populationSize,    // size of set sampling from
+    int sampleSize,        // size of each sample
+    std::vector<int> & samples  // output, zero-offset indicies to selected items
+)
+{
+    // Use Knuth's variable names
+    int& n = sampleSize;
+    int& N = populationSize;
+
+    int t = 0; // total input records dealt with
+    int m = 0; // number of items selected so far
+    double u;
+
+    while (m < n)
+    {
+        u = GetUniform(); // call a uniform(0,1) random number generator
+
+        if ( (N - t)*u >= n - m )
+        {
+            t++;
+        }
+        else
+        {
+            samples[m] = t;
+            t++; m++;
+        }
+    }
+}
+
 #include <limits>
 
 void test()
@@ -114,6 +156,17 @@ void test()
 	assert(need_edge(7,8,ncol));
 	assert(need_edge(0,6,ncol));
 	assert(need_edge(0,7,ncol)==false);
+
+  const size_t sz = 20;
+	std::vector<int> hist(sz);
+  for ( size_t i = 0; i < 500; i++ ) {
+  	++hist[round(sz*GetUniform())]; // generate
+  }
+	for (int i = 0; i<hist.size(); ++i) {
+		std::cout << i << '\t';
+		for (int j=0; j<hist[i]; ++j) std::cout << '*';
+  	std::cout << '\n';
+	}
 }
 
 #include <opencv2/core/core.hpp>
@@ -159,6 +212,8 @@ int main(int argc, char** argv)
 			}
 		}
   }
+
+
 
 	return 0;
 }
