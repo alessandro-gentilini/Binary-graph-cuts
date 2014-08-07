@@ -102,6 +102,7 @@ bool need_edge(const index_1D& m, const index_1D& n, const index_1D& ncol)
 #include <random>
 #include <vector>
 
+// Get a double uniform distributed beetween 0 and 1
 double GetUniform()
 {
 	static std::default_random_engine re;
@@ -109,7 +110,7 @@ double GetUniform()
 	return Dist(re);
 }
 
-// John D. Cook, http://stackoverflow.com/a/311716/15485
+// See John D. Cook, http://stackoverflow.com/a/311716/15485
 void SampleWithoutReplacement
 (
     int populationSize,    // size of set sampling from
@@ -141,6 +142,8 @@ void SampleWithoutReplacement
     }
 }
 
+
+
 #include <limits>
 
 void test()
@@ -162,16 +165,40 @@ void test()
   for ( size_t i = 0; i < 500; i++ ) {
   	++hist[round(sz*GetUniform())]; // generate
   }
-	for (int i = 0; i<hist.size(); ++i) {
-		std::cout << i << '\t';
-		for (int j=0; j<hist[i]; ++j) std::cout << '*';
-  	std::cout << '\n';
-	}
+	// for (int i = 0; i<hist.size(); ++i) {
+	// 	std::cout << i << '\t';
+	// 	for (int j=0; j<hist[i]; ++j) std::cout << '*';
+	//  	std::cout << '\n';
+	// }
+
+  //  std::vector< int > samples(10);
+	// SampleWithoutReplacement(100,10,samples);
+	// for (size_t i = 0; i < 10; i++ ) {
+	// 	std::cout << samples[i] << " ";
+	// }
+	// std::cout << "\n";
 }
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+void corrupt( const cv::Mat input, cv::Mat& output, double percentage )
+{
+	const index_1D N = input.rows*input.cols;
+	size_t sz = percentage * N;
+	if ( sz > N ) return;
+
+	output = input.clone();
+	std::vector< index_1D > points_to_corrupt( sz );
+	SampleWithoutReplacement(N,sz,points_to_corrupt);
+	index_2D p;
+	for ( size_t i = 0; i < sz; i++ ) {
+		p = map_1D_to_2D(points_to_corrupt[i],input.cols);
+		output.at<unsigned char>(p.r,p.c) = output.at<unsigned char>(p.r,p.c)?0:255;
+	}
+}
+
 int main(int argc, char** argv)
 {
 	test();
@@ -190,6 +217,11 @@ int main(int argc, char** argv)
       std::cout <<  "Could not open or find the image '" << image_name << "'\n";
       return -1;
   }
+
+  cv::threshold(image,image,128,255,cv::THRESH_BINARY);
+  cv::Mat corrupted;
+  corrupt(image,corrupted,0.1);
+  cv::imwrite("corrupted.png",corrupted);
 
   const index_1D N = image.rows*image.cols;
   const index_1D ncols = image.cols;
