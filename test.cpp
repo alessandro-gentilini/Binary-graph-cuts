@@ -82,11 +82,10 @@ public:
     //  return o;
     // }
 
-    std::string to_string() const
+    friend std::ostream &operator<< (std::ostream &stream, const index_2D &p)
     {
-        std::ostringstream oss;
-        oss << "(" << r << "," << c << ")";
-        return oss.str();
+        stream << "(" << p.r << "," << p.c << ")";
+        return stream;
     }
 };
 
@@ -126,6 +125,7 @@ double pairwise_term(pixel_gray_level_t w_m, pixel_gray_level_t w_n, double thet
     throw 0;
 }
 
+// U_n in formula (12.12) of Computer Vision: Models, Learning, and Inference.
 double unary_term_source(pixel_gray_level_t w_n, pixel_gray_level_t source)
 {
     static const double equality_cost = 0;
@@ -133,6 +133,7 @@ double unary_term_source(pixel_gray_level_t w_n, pixel_gray_level_t source)
     return w_n == source ? equality_cost : difference_cost;
 }
 
+// U_n in formula (12.12) of Computer Vision: Models, Learning, and Inference.
 double unary_term_sink(pixel_gray_level_t w_n, pixel_gray_level_t sink)
 {
     static const double equality_cost = 0;
@@ -311,7 +312,7 @@ int main(int argc, char **argv)
         pixel_gray_level_t unary_sink = unary_term_sink(w_n, sink_grey_value);
         g->add_tweights( n, unary_source, unary_sink );
 
-        //std::cout << "n=" << n << " 2D=" << p_n.to_string() << " v=" << (int)w_n << " c_source=" << (int)unary_source << " c_sink=" << (int)unary_sink << "\n";
+        //std::cout << "n=" << n << " 2D=" << p_n << " v=" << (int)w_n << " c_source=" << (int)unary_source << " c_sink=" << (int)unary_sink << "\n";
 
         // If edge between m and n is desired
         for ( index_1D m = 0; m < n; m++ )
@@ -325,7 +326,7 @@ int main(int argc, char **argv)
                 double c_nm = pairwise_term(w_n, w_m, theta_10, theta_01);
 
                 g->add_edge(m, n, c_mn, c_nm);
-                //std::cout << "\t2D_m=" << p_m.to_string() << " v=" << (int)w_m << " 2D_n=" << p_n.to_string() << " v=" << (int)w_n << " c_mn=" << c_mn << " c_nm=" << c_nm << "\n";
+                //std::cout << "\t2D_m=" << p_m << " v=" << (int)w_m << " 2D_n=" << p_n << " v=" << (int)w_n << " c_mn=" << c_mn << " c_nm=" << c_nm << "\n";
             }
         }
     }
