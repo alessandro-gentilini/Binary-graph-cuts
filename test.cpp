@@ -61,6 +61,9 @@ void test_Prince_figure_12_6()
 }
 
 typedef int index_1D;
+typedef unsigned char pixel_gray_level_t;
+
+#include <sstream>
 
 // Type accessing an image with a 2D coordinates, i.e. row index and column
 // index.
@@ -70,6 +73,18 @@ public:
 	index_2D(const index_1D& rr=-1, const index_1D& cc=-1):r(rr),c(cc){}
 	index_1D r,c;
 	bool operator==(const index_2D& rhs) const{return r==rhs.r && c==rhs.c;}
+	// std::ostream& operator<<(std::ostream& o, const index_2D& p) const
+	// {
+	// 	o << "(" << p.r << "," << p.c << ")";
+	// 	return o;
+	// }
+
+	std::string to_string() const
+	{
+		std::ostringstream oss;
+		oss << "(" << r << "," << c << ")";
+		return oss.str();
+	}
 };
 
 // Map a linear index to a (row, column) index (zero-based index, row-major order).
@@ -97,6 +112,29 @@ index_1D manhattan_distance(const index_2D& p1, const index_2D& p2)
 bool need_edge(const index_1D& m, const index_1D& n, const index_1D& ncol)
 {
 	return manhattan_distance(map_1D_to_2D(m,ncol),map_1D_to_2D(n,ncol)) == 1;
+}
+
+// P_mn in formula (12.12) of Computer Vision: Models, Learning, and Inference.
+double pairwise_term(pixel_gray_level_t w_m, pixel_gray_level_t w_n, double theta_10, double theta_01)
+{
+	if ( w_m == w_n ) return 0;// diagonal cost
+	if ( w_m!=0 && w_n==0 ) return theta_10;
+	if ( w_m==0 && w_n!=0 ) return theta_01;
+	throw 0;
+}
+
+double unary_term_source(pixel_gray_level_t w_n, pixel_gray_level_t source)
+{
+	static const double equality_cost = 0;
+	static const double difference_cost = 1;
+	return w_n==source?equality_cost:difference_cost;
+}
+
+double unary_term_sink(pixel_gray_level_t w_n, pixel_gray_level_t sink)
+{
+	static const double equality_cost = 0;
+	static const double difference_cost = 1;
+	return w_n==sink?equality_cost:difference_cost;
 }
 
 #include <random>
@@ -195,7 +233,7 @@ void corrupt( const cv::Mat input, cv::Mat& output, double percentage )
 	index_2D p;
 	for ( size_t i = 0; i < sz; i++ ) {
 		p = map_1D_to_2D(points_to_corrupt[i],input.cols);
-		output.at<unsigned char>(p.r,p.c) = output.at<unsigned char>(p.r,p.c)?0:255;
+		output.at<pixel_gray_level_t>(p.r,p.c) = output.at<pixel_gray_level_t>(p.r,p.c)?0:255;
 	}
 }
 
@@ -203,10 +241,15 @@ int main(int argc, char** argv)
 {
 	test();
 
-  if( argc != 2)
+  if( argc < 2)
   {
    std::cout <<" Usage: " << argv[0] << " image_to_process" << "\n";
    return -1;
+  }
+
+  bool do_corruption = true;
+  if ( argc == 3 ) {
+  	do_corruption = false;
   }
 
   std::string image_name(argv[1]);
@@ -219,14 +262,30 @@ int main(int argc, char** argv)
   }
 
   cv::threshold(image,image,128,255,cv::THRESH_BINARY);
+  cv::imwrite("binarized.png",image);
+
+  //std::cout << "\n" << image << "\n\n";
+
   cv::Mat corrupted;
-  corrupt(image,corrupted,0.1);
+  if ( do_corruption ) {
+  	corrupt(image,corrupted,0.1);
+	} else {
+  	corrupted = image.clone();
+	}
   cv::imwrite("corrupted.png",corrupted);
 
   const index_1D N = image.rows*image.cols;
   const index_1D ncols = image.cols;
 
-	typedef Graph<int,int,int> GraphType;
+  const double theta_10 = 1;
+  const double theta_01 = 1;
+
+  const pixel_gray_level_t source_grey_value = 0;
+  const pixel_gray_level_t sink_grey_value = 255;
+
+  //std::cout << "source=" << (int)source_grey_value << " sink=" << (int)sink_grey_value << "\n\n";
+
+	typedef Graph<double,double,double> GraphType;
 	// Initialize graph to empty
 	GraphType *g = new GraphType(N,4*N);
 
@@ -234,18 +293,54 @@ int main(int argc, char** argv)
 	g->add_node(N);
 
   for ( index_1D n = 0; n < N; n++ ) {
+  	index_2D p_n = map_1D_to_2D(n,ncols);
+  	pixel_gray_level_t w_n = corrupted.at<pixel_gray_level_t>(p_n.r,p_n.c);
+
   	// Create edges from source and to sink and set capacity to zero
-		g->add_tweights( n, 0, 0 );
+  	pixel_gray_level_t unary_source = unary_term_source(w_n,source_grey_value);
+  	pixel_gray_level_t unary_sink = unary_term_sink(w_n,sink_grey_value);
+		g->add_tweights( n, unary_source, unary_sink );
+
+		//std::cout << "n=" << n << " 2D=" << p_n.to_string() << " v=" << (int)w_n << " c_source=" << (int)unary_source << " c_sink=" << (int)unary_sink << "\n";
 
 		// If edge between m and n is desired
-		for ( index_1D m = 0; m < n-1; m++ ) {
+		for ( index_1D m = 0; m < n; m++ ) {
 			if ( need_edge(m,n,ncols) ) {
-				g->add_edge(m,n,0,0);
+				index_2D p_m = map_1D_to_2D(m,ncols);
+				pixel_gray_level_t w_m = corrupted.at<pixel_gray_level_t>(p_m.r,p_m.c);
+
+				double c_mn = pairwise_term(w_m,w_n,theta_10,theta_01);
+				double c_nm = pairwise_term(w_n,w_m,theta_10,theta_01);
+
+				g->add_edge(m,n,c_mn,c_nm);
+				//std::cout << "\t2D_m=" << p_m.to_string() << " v=" << (int)w_m << " 2D_n=" << p_n.to_string() << " v=" << (int)w_n << " c_mn=" << c_mn << " c_nm=" << c_nm << "\n";
 			}
 		}
   }
 
+  std::cout << "\n\nWARNING: REPARAMETERIZATION NOT EXECUTED.\n\n";
 
+  double flow = g -> maxflow();
+
+	cv::Mat result = corrupted.clone();
+  for ( index_1D n = 0; n < N; n++ ) {
+  	const index_2D p = map_1D_to_2D(n,ncols);
+  	if (g->what_segment(n) == GraphType::SOURCE) {
+  		result.at<pixel_gray_level_t>(p.r,p.c) = source_grey_value;
+  	} else if (g->what_segment(n) == GraphType::SINK) {
+  		result.at<pixel_gray_level_t>(p.r,p.c) = sink_grey_value;
+  	}
+  }
+
+  cv::imwrite("result.png",result);
+
+  cv::Mat flipped = result.clone();
+  for ( index_1D n = 0; n < N; n++ ) {
+  	const index_2D p = map_1D_to_2D(n,ncols);
+  	flipped.at<pixel_gray_level_t>(p.r,p.c) = result.at<pixel_gray_level_t>(p.r,p.c)?0:255;
+  }
+
+	cv::imwrite("flipped.png",flipped);
 
 	return 0;
 }
