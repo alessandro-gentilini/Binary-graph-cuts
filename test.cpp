@@ -363,8 +363,9 @@ int main(int argc, char **argv)
 
     std::string opencv_working_version = "2.4.4";
     std::string current_opencv_version = CV_VERSION;
-    if ( opencv_working_version != current_opencv_version ) {
-    	std::cerr << "\n\nWARNING: TESTED WITH OPENCV " << opencv_working_version << ". IT SEEMS YOU HAVE VERSION " << current_opencv_version << " INSTEAD.\n\n";
+    if ( opencv_working_version != current_opencv_version )
+    {
+        std::cerr << "\n\nWARNING: TESTED WITH OPENCV " << opencv_working_version << ". IT SEEMS YOU HAVE VERSION " << current_opencv_version << " INSTEAD.\n\n";
     }
 
     return 0;
