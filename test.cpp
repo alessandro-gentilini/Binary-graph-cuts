@@ -359,7 +359,7 @@ int main(int argc, char **argv)
         flipped.at<pixel_gray_level_t>(p.r, p.c) = result.at<pixel_gray_level_t>(p.r, p.c) ? 0 : 255;
     }
 
-    cv::imwrite("flipped.png", flipped);
+    cv::imwrite(std::string("denoised_")+image_name, flipped);
 
     std::string opencv_working_version = "2.4.4";
     std::string current_opencv_version = CV_VERSION;
