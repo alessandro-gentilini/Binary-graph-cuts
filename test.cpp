@@ -190,6 +190,7 @@ void SampleWithoutReplacement
 
 void test()
 {
+
     test_Prince_figure_12_6();
 
     assert(std::numeric_limits<index_1D>::is_integer);
@@ -331,7 +332,7 @@ int main(int argc, char **argv)
         }
     }
 
-    std::cout << "\n\nWARNING: REPARAMETERIZATION NOT EXECUTED.\n\n";
+    std::cerr << "\n\nWARNING: REPARAMETERIZATION NOT EXECUTED.\n\n";
 
     double flow = g -> maxflow();
 
@@ -359,6 +360,12 @@ int main(int argc, char **argv)
     }
 
     cv::imwrite("flipped.png", flipped);
+
+    std::string opencv_working_version = "2.4.4";
+    std::string current_opencv_version = CV_VERSION;
+    if ( opencv_working_version != current_opencv_version ) {
+    	std::cerr << "\n\nWARNING: TESTED WITH OPENCV " << opencv_working_version << ". IT SEEMS YOU HAVE VERSION " << current_opencv_version << " INSTEAD.\n\n";
+    }
 
     return 0;
 }
