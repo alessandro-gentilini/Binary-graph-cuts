@@ -19,7 +19,7 @@ The following command line
 
 `./binary_graph_cuts fig_12.12.png no`
 
-apply the denoising algorithm to the left image in order to get the right image:
+applies the denoising algorithm to the left image in order to get the right image:
 
 ![input image](./fig_12.12.png) ![input image](./denoised_fig_12.12.png)
 
