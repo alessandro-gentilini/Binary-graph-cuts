@@ -21,5 +21,5 @@ The following command line
 
 applies the denoising algorithm to the left image in order to get the right image:
 
-![input image](./fig_12.12.png) ![input image](./denoised_fig_12.12.png)
+![input image](./fig_12.12.png) ![output image](./denoised_fig_12.12.png)
 
