@@ -1,7 +1,7 @@
 Binary-graph-cuts
 =================
 
-#Introduction
+# Introduction
 
 A C++ implementation of the Algorithm 12.1, *Binary graph cuts*, as found in the [*Algorithm Booklet*](http://www.cs.ucl.ac.uk/staff/s.prince/book/Algorithms.pdf) by [Simon J.D. Prince](http://www0.cs.ucl.ac.uk/staff/s.prince/).
 
@@ -13,7 +13,7 @@ The maximum flow algorithm is [MAXFLOW version 3.03](http://pub.ist.ac.at/~vnk/s
 
 Tested with OpenCV version 2.4.4.
 
-#Demo
+# Demo
 
 The following command line
 
